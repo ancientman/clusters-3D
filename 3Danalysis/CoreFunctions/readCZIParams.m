@@ -1,0 +1,20 @@
+function [seriesMetaDataDS] = readCZIParams(seriesMetaDataDS)
+seriesFilePath = seriesMetaDataDS.expInfo.rawDataFilePath;
+reader = bfGetReader(seriesFilePath);
+omeMeta = reader.getMetadataStore();
+omeGlobalMeta = reader.getGlobalMetadata();
+seriesMetaDataDS.imagingInfo.seriesLength = str2double(omeGlobalMeta.get(strcat('Information|Image|SizeS #1')));	
+% seriesMetaDataDS.imagingInfo.seriesLength = str2double(omeGlobalMeta.get(strcat('Information|Image|SizeS')));	
+seriesMetaDataDS.imagingInfo.seriesLength(isnan(seriesMetaDataDS.imagingInfo.seriesLength)) = 1;
+seriesMetaDataDS.imagingInfo.frameTime = str2double(omeGlobalMeta.get(strcat('Information|Image|Channel|LaserScanInfo|FrameTime #1')));	
+% seriesMetaDataDS.imagingInfo.frameTime = str2double(omeGlobalMeta.get(strcat('Information|Image|Channel|LaserScanInfo|FrameTime')));	
+seriesMetaDataDS.imagingInfo.frameTime(isnan(seriesMetaDataDS.imagingInfo.frameTime)) = 1;
+seriesMetaDataDS.imagingInfo.stackSizeX = omeMeta.getPixelsSizeX(0).getValue(); % image width, pixels
+seriesMetaDataDS.imagingInfo.stackSizeY = omeMeta.getPixelsSizeY(0).getValue(); % image height, pixels
+seriesMetaDataDS.imagingInfo.stackSizeZ = omeMeta.getPixelsSizeZ(0).getValue(); % number of Z slices
+seriesMetaDataDS.imagingInfo.timePoints = omeMeta.getPixelsSizeT(0).getValue(); % number of timePoints
+seriesMetaDataDS.imagingInfo.channelCount = omeMeta.getChannelCount(0); % total color channels
+seriesMetaDataDS.analysisInfo.xPixUM = double(omeMeta.getPixelsPhysicalSizeX(0).value(ome.units.UNITS.MICROMETER)); % in µm
+seriesMetaDataDS.analysisInfo.yPixUM = double(omeMeta.getPixelsPhysicalSizeY(0).value(ome.units.UNITS.MICROMETER)); % in µm
+seriesMetaDataDS.analysisInfo.zPixUM =double( omeMeta.getPixelsPhysicalSizeZ(0).value(ome.units.UNITS.MICROMETER)); % in µm
+end
